@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matcher.Api", "Matcher.Api\Matcher.Api.csproj", "{B17D817E-24DB-445B-A0AE-364CED0E5D2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matcher.Business", "Matcher.Business\Matcher.Business.csproj", "{C8001DFD-3485-4217-A680-742CD505804B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matcher.Data", "Matcher.Data\Matcher.Data.csproj", "{A45D5D75-944A-4549-BA02-BE6910050BEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B17D817E-24DB-445B-A0AE-364CED0E5D2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B17D817E-24DB-445B-A0AE-364CED0E5D2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B17D817E-24DB-445B-A0AE-364CED0E5D2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B17D817E-24DB-445B-A0AE-364CED0E5D2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8001DFD-3485-4217-A680-742CD505804B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8001DFD-3485-4217-A680-742CD505804B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8001DFD-3485-4217-A680-742CD505804B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8001DFD-3485-4217-A680-742CD505804B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A45D5D75-944A-4549-BA02-BE6910050BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A45D5D75-944A-4549-BA02-BE6910050BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A45D5D75-944A-4549-BA02-BE6910050BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A45D5D75-944A-4549-BA02-BE6910050BEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
