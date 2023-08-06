@@ -1,3 +1,7 @@
+using Matcher.Data;
+using Matcher.Data.Repositories;
+using Matcher.Business.Interfaces;
+
 namespace Matcher.Api.Extensions;
 
 public static class ServiceCollectionExtensions
@@ -14,7 +18,18 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddDataServices(this IServiceCollection services,
         ConfigurationManager configurationManager)
     {
-        // data services
+        var postgresHost = configurationManager["Postgres:Host"];
+        var postgresPort = configurationManager["Postgres:Port"];
+        var postgresDatabase = configurationManager["Postgres:Database"];
+        var postgresUser = configurationManager["Postgres:User"];
+        var postgresPassword = configurationManager["Postgres:Password"];
+
+        var connectionString =
+            $"Host={postgresHost};Port={postgresPort};Database={postgresDatabase};Username={postgresUser};Password={postgresPassword}";
+
+        services.AddNpgsql<ApplicationContext>(connectionString);
+
+        services.AddScoped<IProfileRepository, EfCoreProfileRepository>();
 
         return services;
     }
