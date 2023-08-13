@@ -1,3 +1,5 @@
+using Matcher.Business.Core;
+using Matcher.Business.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Matcher.Api.Controllers;
@@ -6,9 +8,17 @@ namespace Matcher.Api.Controllers;
 [Route("api/match")]
 public sealed class MatchController : Controller
 {
-    [HttpGet]
-    public async Task Get()
+    private readonly MatchService _matchService;
+
+    public MatchController(MatchService matchService)
     {
-        throw new NotImplementedException();
+        _matchService = matchService;
+    }
+    
+    // Temp
+    [HttpGet("{id}")]
+    public async Task<Profile> Get([FromRoute] string id)
+    {
+        return await _matchService.GetAsync(id);
     }
 }

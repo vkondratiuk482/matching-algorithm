@@ -1,0 +1,52 @@
+using System.Text.Json;
+using StackExchange.Redis;
+using Matcher.Business.Interfaces;
+
+namespace Matcher.Business.Services;
+
+public class RedisCacheService : ICacheService
+{
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
+
+    public RedisCacheService(IConnectionMultiplexer connectionMultiplexer)
+    {
+        _connectionMultiplexer = connectionMultiplexer;
+    }
+
+    public async Task<bool> KeyExistsAsync(string key)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        return await database.KeyExistsAsync(key);
+    }
+
+    public async Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl)
+    {
+        var transaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
+        
+        foreach (var item in list)
+        {
+            var serialized = JsonSerializer.Serialize(item);
+                
+            transaction.ListRightPushAsync(key, new RedisValue(serialized));
+        }
+
+        transaction.KeyExpireAsync(key, ttl);
+
+        await transaction.ExecuteAsync();
+    }
+
+    public async Task<T> ListPopAsync<T>(string key)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        var value = await database.ListRightPopAsync(key);
+
+        if (!value.HasValue)
+        {
+            throw new InvalidOperationException();
+        }
+
+        return JsonSerializer.Deserialize<T>(value.ToString());
+    }
+}

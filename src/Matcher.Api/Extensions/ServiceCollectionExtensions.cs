@@ -1,6 +1,9 @@
 using Matcher.Data;
 using Matcher.Data.Repositories;
+using Matcher.Business.Services;
 using Matcher.Business.Interfaces;
+
+using StackExchange.Redis;
 
 namespace Matcher.Api.Extensions;
 
@@ -37,7 +40,17 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddBusinessServices(this IServiceCollection services,
         ConfigurationManager configurationManager)
     {
-        // business services
+        var redisConfigOptions = new ConfigurationOptions
+        {
+            Password = configurationManager["Redis:Password"],
+            EndPoints = { configurationManager["Redis:EndPoint"], },
+        };
+
+        services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConfigOptions));
+        
+        services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddScoped<MatchService>();
+        services.AddScoped<ProfileService>();
 
         return services;
     }

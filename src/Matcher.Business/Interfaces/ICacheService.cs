@@ -2,9 +2,9 @@ namespace Matcher.Business.Interfaces;
 
 public interface ICacheService
 {
-    Task<bool> KeyExists(string key);
+    Task<bool> KeyExistsAsync(string key);
     
-    Task ListPush<T>(string key, IEnumerable<T> list, int ttl);
+    Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl);
 
-    Task<T> ListPop<T>(string key);
+    Task<T> ListPopAsync<T>(string key);
 }
