@@ -13,7 +13,7 @@ public class RedisCacheService : ICacheService
         _connectionMultiplexer = connectionMultiplexer;
     }
 
-    public async Task<bool> KeyExistsAsync(string key)
+    public async Task<bool> ExistsAsync(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
 
@@ -23,11 +23,11 @@ public class RedisCacheService : ICacheService
     public async Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl)
     {
         var transaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
-        
+
         foreach (var item in list)
         {
             var serialized = JsonSerializer.Serialize(item);
-                
+
             transaction.ListRightPushAsync(key, new RedisValue(serialized));
         }
 
