@@ -13,11 +13,13 @@ public class RedisCacheService : ICacheService
         _connectionMultiplexer = connectionMultiplexer;
     }
 
-    public async Task<bool> ExistsAsync(string key)
+    public async Task<bool> ListEmptyAsync(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
 
-        return await database.KeyExistsAsync(key);
+        var length = await database.ListLengthAsync(key);
+
+        return length == 0;
     }
 
     public async Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl)

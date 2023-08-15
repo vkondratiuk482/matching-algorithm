@@ -16,9 +16,9 @@ public class MatchService
 
     public async Task<Profile> GetAsync(string id)
     {
-        var cached = await _cacheService.ExistsAsync(id);
+        var empty = await _cacheService.ListEmptyAsync(id);
 
-        if (!cached)
+        if (empty)
         {
             var profiles = await _profileService.GetAsync();
 
