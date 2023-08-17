@@ -14,9 +14,34 @@ public class EfCoreProfileRepository : IProfileRepository
         _applicationContext = applicationContext;
     }
 
-    public async Task<IEnumerable<Profile>> GetAsync()
+    public async Task<IEnumerable<Profile>> GetAsync(MatchingMask mask, int take, int skip)
     {
-        var profileEntities = await _applicationContext.Profiles.ToListAsync();
+        var query = _applicationContext.Profiles.AsQueryable();
+
+        if (!string.IsNullOrEmpty(mask.Name))
+        {
+            query = query.Where(x => x.Name == mask.Name);
+        }
+
+        if (!string.IsNullOrEmpty(mask.Description))
+        {
+            query = query.Where(x => x.Description == mask.Description);
+        }
+
+        if (mask.Age != null)
+        {
+            query = query.Where(x => x.Age == mask.Age);
+        }
+
+        if (mask.Gender != null)
+        {
+            query = query.Where(x => x.Gender == mask.Gender);
+        }
+
+        query = query.Take(take);
+        query = query.Skip(skip);
+
+        var profileEntities = await query.ToListAsync();
 
         return ProfileAdapter.FromEntityList(profileEntities);
     }

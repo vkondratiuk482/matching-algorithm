@@ -1,4 +1,5 @@
 using Matcher.Business.Core;
+using Matcher.Business.Enums;
 using Matcher.Business.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +15,23 @@ public sealed class MatchController : Controller
     {
         _matchService = matchService;
     }
-    
+
     // Temp
     [HttpGet("{id}")]
-    public async Task<Profile> Get([FromRoute] string id)
+    public async Task<Profile> Get(string id,
+        int? age,
+        string? name,
+        Genders gender,
+        string? description)
     {
-        return await _matchService.GetAsync(id);
+        var mask = new MatchingMask
+        {
+            Age = age,
+            Name = name,
+            Gender = gender,
+            Description = description,
+        };
+
+        return await _matchService.GetAsync(id, mask);
     }
 }

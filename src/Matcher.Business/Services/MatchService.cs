@@ -14,13 +14,13 @@ public class MatchService
         _profileService = profileService;
     }
 
-    public async Task<Profile> GetAsync(string id)
+    public async Task<Profile> GetAsync(string id, MatchingMask mask)
     {
         var empty = await _cacheService.ListEmptyAsync(id);
 
         if (empty)
         {
-            var profiles = await _profileService.GetAsync();
+            var profiles = await _profileService.GetAsync(mask);
 
             await _cacheService.ListCreateAsync<Profile>(id, profiles, TimeSpan.FromMinutes(10));
         }
