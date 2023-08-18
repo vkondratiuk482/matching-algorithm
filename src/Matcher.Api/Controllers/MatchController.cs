@@ -21,15 +21,13 @@ public sealed class MatchController : Controller
     public async Task<Profile> Get(string id,
         int? age,
         string? name,
-        Genders gender,
-        string? description)
+        Genders gender)
     {
         var mask = new MatchingMask
         {
             Age = age,
             Name = name,
             Gender = gender,
-            Description = description,
         };
 
         return await _matchService.GetAsync(id, mask);

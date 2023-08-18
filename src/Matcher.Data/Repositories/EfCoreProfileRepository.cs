@@ -23,11 +23,6 @@ public class EfCoreProfileRepository : IProfileRepository
             query = query.Where(x => x.Name == mask.Name);
         }
 
-        if (!string.IsNullOrEmpty(mask.Description))
-        {
-            query = query.Where(x => x.Description == mask.Description);
-        }
-
         if (mask.Age != null)
         {
             query = query.Where(x => x.Age == mask.Age);
