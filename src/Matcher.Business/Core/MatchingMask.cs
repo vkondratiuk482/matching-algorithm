@@ -9,4 +9,15 @@ public class MatchingMask
     public int? Age { get; set; }
 
     public Genders? Gender { get; set; }
+
+    public string ToString()
+    {
+        var pieces = new List<string>();
+
+        pieces.Add($"name: {Name}");
+        pieces.Add($"age: {Age}");
+        pieces.Add($"gender: {Gender}");
+
+        return string.Join(",", pieces);
+    }
 }

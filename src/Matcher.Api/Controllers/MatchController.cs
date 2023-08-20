@@ -18,7 +18,7 @@ public sealed class MatchController : Controller
 
     // Temp
     [HttpGet("{id}")]
-    public async Task<Profile> Get(string id,
+    public async Task<Profile?> Get(string id,
         int? age,
         string? name,
         Genders gender)

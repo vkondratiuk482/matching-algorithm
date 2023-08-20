@@ -13,6 +13,27 @@ public class RedisCacheService : ICacheService
         _connectionMultiplexer = connectionMultiplexer;
     }
 
+    public async Task KeyDeleteAsync(string key)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        await database.KeyDeleteAsync(key);
+    }
+
+    public async Task<string> KeyGetByPatternAsync(string pattern)
+    {
+        var keys = new List<RedisKey>();
+        
+        foreach (var endpoint in _connectionMultiplexer.GetEndPoints())
+        {
+            var server = _connectionMultiplexer.GetServer(endpoint);
+            
+            keys.AddRange(server.Keys(pattern: pattern));
+        }
+
+        return keys.FirstOrDefault().ToString();
+    }
+
     public async Task<bool> ListEmptyAsync(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
