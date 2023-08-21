@@ -1,4 +1,5 @@
 using Matcher.Data;
+using Matcher.Data.Services;
 using Matcher.Data.Repositories;
 using Matcher.Business.Services;
 using Matcher.Business.Interfaces;
@@ -34,12 +35,6 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IProfileRepository, EfCoreProfileRepository>();
 
-        return services;
-    }
-
-    private static IServiceCollection AddBusinessServices(this IServiceCollection services,
-        ConfigurationManager configurationManager)
-    {
         var redisConfigOptions = new ConfigurationOptions
         {
             Password = configurationManager["Redis:Password"],
@@ -47,8 +42,15 @@ public static class ServiceCollectionExtensions
         };
 
         services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConfigOptions));
-        
+
         services.AddScoped<ICacheService, RedisCacheService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddBusinessServices(this IServiceCollection services,
+        ConfigurationManager configurationManager)
+    {
         services.AddScoped<MatchService>();
         services.AddScoped<ProfileService>();
 
