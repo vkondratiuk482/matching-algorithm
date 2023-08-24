@@ -13,21 +13,37 @@ public class RedisCacheService : ICacheService
         _connectionMultiplexer = connectionMultiplexer;
     }
 
-    public async Task KeyDeleteAsync(string key)
+    public async Task<string> GetStringByKeyAsync(string key)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        var value = await database.StringGetAsync(key);
+
+        return value.ToString();
+    }
+
+    public async Task SetStringByKeyAsync(string key, string value, TimeSpan ttl)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        await database.StringSetAsync(key, value, ttl);
+    }
+
+    public async Task DeleteKeyAsync(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
 
         await database.KeyDeleteAsync(key);
     }
 
-    public async Task<string> KeyGetByPatternAsync(string pattern)
+    public async Task<string> GetKeyByPatternAsync(string pattern)
     {
         var keys = new List<RedisKey>();
-        
+
         foreach (var endpoint in _connectionMultiplexer.GetEndPoints())
         {
             var server = _connectionMultiplexer.GetServer(endpoint);
-            
+
             keys.AddRange(server.Keys(pattern: pattern));
         }
 
@@ -43,7 +59,7 @@ public class RedisCacheService : ICacheService
         return length == 0;
     }
 
-    public async Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl)
+    public async Task CreateListAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl)
     {
         var transaction = _connectionMultiplexer.GetDatabase().CreateTransaction();
 
@@ -59,7 +75,7 @@ public class RedisCacheService : ICacheService
         await transaction.ExecuteAsync();
     }
 
-    public async Task<T> ListPopAsync<T>(string key)
+    public async Task<T> PopFromListAsync<T>(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
 

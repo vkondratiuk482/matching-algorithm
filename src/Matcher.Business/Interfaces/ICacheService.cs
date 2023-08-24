@@ -2,13 +2,17 @@ namespace Matcher.Business.Interfaces;
 
 public interface ICacheService
 {
-    Task KeyDeleteAsync(string key);
+    Task DeleteKeyAsync(string key);
 
-    Task<string> KeyGetByPatternAsync(string pattern);
+    Task SetStringByKeyAsync(string key, string value, TimeSpan ttl);
+    
+    Task<string> GetStringByKeyAsync(string key);
+
+    Task<string> GetKeyByPatternAsync(string pattern);
 
     Task<bool> ListEmptyAsync(string key);
 
-    Task ListCreateAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl);
+    Task CreateListAsync<T>(string key, IEnumerable<T> list, TimeSpan ttl);
 
-    Task<T> ListPopAsync<T>(string key);
+    Task<T> PopFromListAsync<T>(string key);
 }

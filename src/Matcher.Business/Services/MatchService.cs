@@ -9,6 +9,9 @@ public class MatchService
     private readonly ICacheService _cacheService;
     private readonly ProfileService _profileService;
 
+    private static readonly int DefaultTake = 100;
+    private static readonly int DefaultOffset = 0;
+
     public MatchService(ICacheService cacheService, ProfileService profileService)
     {
         _cacheService = cacheService;
@@ -21,18 +24,31 @@ public class MatchService
 
         var key = prefix + mask.ToString();
         
-        var existingKey = await _cacheService.KeyGetByPatternAsync(prefix + "*");
+        var existingKey = await _cacheService.GetKeyByPatternAsync(prefix + "*");
 
         if (existingKey != key)
         {
-            await _cacheService.KeyDeleteAsync(existingKey);
+            await _cacheService.DeleteKeyAsync(existingKey);
         }
 
         var empty = await _cacheService.ListEmptyAsync(key);
 
         if (empty)
         {
-            var profiles = await _profileService.GetAsync(mask);
+            var existingOffset = int.Parse(await _cacheService.GetStringByKeyAsync(prefix + "offset"));
+
+            var offsetToCommit = DefaultOffset;
+
+            if (existingOffset != 0)
+            {
+                offsetToCommit += DefaultTake;
+            }
+
+            await _cacheService.SetStringByKeyAsync(prefix + "offset", offsetToCommit.ToString(), TimeSpan.FromMinutes(10));
+
+            // Add sorting in by createdAt/updatedAt by DESCENDING order
+            // This way we can display the latest profiles
+            var profiles = await _profileService.GetAsync(mask, DefaultTake, offsetToCommit);
 
             var enumerable = profiles.ToArray();
             
@@ -41,9 +57,9 @@ public class MatchService
                 return null;
             }
             
-            await _cacheService.ListCreateAsync<Profile>(key, enumerable, TimeSpan.FromMinutes(10));
+            await _cacheService.CreateListAsync<Profile>(key, enumerable, TimeSpan.FromMinutes(10));
         }
 
-        return await _cacheService.ListPopAsync<Profile>(key);
+        return await _cacheService.PopFromListAsync<Profile>(key);
     }
 }
