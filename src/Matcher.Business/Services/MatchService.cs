@@ -35,20 +35,18 @@ public class MatchService
 
         if (empty)
         {
-            var existingOffset = int.Parse(await _cacheService.GetStringByKeyAsync(prefix + "offset"));
+            var offset = await _profileService.GetOffsetAsync(id);
 
-            var offsetToCommit = DefaultOffset;
-
-            if (existingOffset != 0)
+            if (offset != 0)
             {
-                offsetToCommit += DefaultTake;
+                offset += DefaultTake;
             }
 
-            await _cacheService.SetStringByKeyAsync(prefix + "offset", offsetToCommit.ToString(), TimeSpan.FromMinutes(10));
+            await _profileService.CommitOffset(id, offset);
 
             // Add sorting in by createdAt/updatedAt by DESCENDING order
             // This way we can display the latest profiles
-            var profiles = await _profileService.GetAsync(mask, DefaultTake, offsetToCommit);
+            var profiles = await _profileService.GetAsync(mask, DefaultTake, offset);
 
             var enumerable = profiles.ToArray();
             
