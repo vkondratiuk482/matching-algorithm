@@ -7,3 +7,7 @@
 * .NET 6.0
 * PostgreSQL, Redis
 * EntityFrameworkCore
+
+### Database structure (not complete yet)
+
+![Database Structure](assets/database-structure.png)
