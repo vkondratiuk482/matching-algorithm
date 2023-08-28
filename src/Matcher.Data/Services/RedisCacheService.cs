@@ -13,13 +13,18 @@ public class RedisCacheService : ICacheService
         _connectionMultiplexer = connectionMultiplexer;
     }
 
-    public async Task<string> GetStringByKeyAsync(string key)
+    public async Task<string?> GetStringByKeyAsync(string key)
     {
         var database = _connectionMultiplexer.GetDatabase();
 
-        var value = await database.StringGetAsync(key);
+        var result = await database.StringGetAsync(key);
 
-        return value.ToString();
+        if (!result.HasValue)
+        {
+            return null;
+        }
+
+        return result.ToString();
     }
 
     public async Task SetStringByKeyAsync(string key, string value, TimeSpan ttl)

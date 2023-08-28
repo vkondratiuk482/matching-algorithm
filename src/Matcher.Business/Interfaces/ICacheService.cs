@@ -6,7 +6,7 @@ public interface ICacheService
 
     Task SetStringByKeyAsync(string key, string value, TimeSpan ttl);
     
-    Task<string> GetStringByKeyAsync(string key);
+    Task<string?> GetStringByKeyAsync(string key);
 
     Task<string> GetKeyByPatternAsync(string pattern);
 

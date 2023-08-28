@@ -14,6 +14,14 @@ public class EfCoreProfileRepository : IProfileRepository
         _applicationContext = applicationContext;
     }
 
+    public async Task<Profile> GetByUserIdAsync(int userId)
+    {
+        var profileEntity = await _applicationContext.Profiles.FirstOrDefaultAsync(x => x.UserId == userId);
+
+        return ProfileAdapter.FromEntity(profileEntity);
+    }
+
+    // TODO: Refactor to Specification Pattern
     public async Task<IEnumerable<Profile>> GetAsync(MatchingMask mask, int take, int skip)
     {
         var query = _applicationContext.Profiles.AsQueryable();
@@ -31,6 +39,16 @@ public class EfCoreProfileRepository : IProfileRepository
         if (mask.Gender != null)
         {
             query = query.Where(x => x.Gender == mask.Gender);
+        }
+
+        if (mask.MinScore != null)
+        {
+            query = query.Where(x => x.Score >= mask.MinScore);
+        }
+
+        if (mask.MaxScore != null)
+        {
+            query = query.Where(x => x.Score <= mask.MaxScore);
         }
 
         query = query.Take(take);

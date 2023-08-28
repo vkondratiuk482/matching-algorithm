@@ -4,7 +4,7 @@ namespace Matcher.Data.Entities;
 
 public class ProfileEntity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
 
@@ -13,4 +13,11 @@ public class ProfileEntity
     public int Age { get; set; }
 
     public Genders Gender { get; set; }
+
+    public int Score { get; set; }
+
+    public int UncommittedScore { get; set; }
+
+    public int UserId { get; set; }
+    public UserEntity? User { get; set; }
 }
