@@ -2,7 +2,7 @@ using Matcher.Business.Enums;
 
 namespace Matcher.Business.Core;
 
-public class MatchingMask
+public class ProfileCriteria
 {
     public string? Name { get; set; }
 

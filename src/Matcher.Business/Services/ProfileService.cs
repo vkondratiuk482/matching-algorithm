@@ -17,8 +17,8 @@ public class ProfileService
         return await _profileRepository.GetByUserIdAsync(id);
     }
 
-    public async Task<IEnumerable<Profile>> GetAsync(MatchingMask mask, int take = 100, int skip = 0)
+    public async Task<IEnumerable<Profile>> GetAsync(ProfileCriteria criteria, int take = 100, int skip = 0)
     {
-        return await _profileRepository.GetAsync(mask, take, skip);
+        return await _profileRepository.GetAsync(criteria, take, skip);
     }
 }

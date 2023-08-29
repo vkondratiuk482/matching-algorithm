@@ -8,33 +8,27 @@ public class MatchService
     private readonly ICacheService _cacheService;
     private readonly ProfileService _profileService;
 
-    private static readonly int ScoreDelta = 1;
-    
-    private static readonly int DefaultTake = 100;
-    private static readonly int DefaultOffset = 0;
-
-    private static readonly string OffsetCachePrefix = "offset:";
-    private static readonly TimeSpan OffsetCacheTimeSpan = TimeSpan.FromMinutes(10);
-
-    private static readonly string ProfilesCachePrefix = "profiles:";
-    private static readonly TimeSpan ProfilesCacheTimeSpan = TimeSpan.FromMinutes(10);
-
     public MatchService(ICacheService cacheService, ProfileService profileService)
     {
         _cacheService = cacheService;
         _profileService = profileService;
     }
 
-    public async Task<Profile?> GetAsync(int userId, MatchingMask mask)
+    public async Task<Profile?> GetAsync(int userId, MatchingCriteria matchingCriteria)
     {
         var profile = await _profileService.GetByUserIdAsync(userId);
 
-        mask.MinScore = profile.Score - ScoreDelta;
-        mask.MaxScore = profile.Score + ScoreDelta;
+        var profileCriteria = new ProfileCriteria
+        {
+            Age = matchingCriteria.Age,
+            Gender = matchingCriteria.Gender,
+            MinScore = profile.Score - MatchingConstants.ScoreDelta,
+            MaxScore = profile.Score + MatchingConstants.ScoreDelta,
+        };
 
-        var prefix = ProfilesCachePrefix + profile.Id;
+        var prefix = MatchingConstants.ProfilesCachePrefix + profile.Id;
 
-        var key = prefix + mask.ToString();
+        var key = prefix + profileCriteria.ToString();
 
         var existingKey = await _cacheService.GetKeyByPatternAsync(prefix + "*");
 
@@ -45,39 +39,41 @@ public class MatchService
 
         var empty = await _cacheService.ListEmptyAsync(key);
 
-        if (empty)
+        if (!empty)
         {
-            var offset = await GetOffsetAsync(profile.Id);
-
-            if (offset != 0)
-            {
-                offset += DefaultTake;
-            }
-
-            await CommitOffsetAsync(profile.Id, offset);
-
-            var profiles = await _profileService.GetAsync(mask, DefaultTake, offset);
-
-            var enumerable = profiles.ToArray();
-
-            if (!enumerable.Any())
-            {
-                return null;
-            }
-
-            await _cacheService.CreateListAsync<Profile>(key, enumerable, ProfilesCacheTimeSpan);
+            return await _cacheService.PopFromListAsync<Profile>(key);
         }
+
+        var offset = await GetOffsetAsync(profile.Id);
+
+        if (offset != MatchingConstants.DefaultOffset)
+        {
+            offset += MatchingConstants.DefaultTake;
+        }
+
+        await CommitOffsetAsync(profile.Id, offset);
+
+        var profiles = await _profileService.GetAsync(profileCriteria, MatchingConstants.DefaultTake, offset);
+
+        var enumerable = profiles.ToArray();
+
+        if (!enumerable.Any())
+        {
+            return null;
+        }
+
+        await _cacheService.CreateListAsync(key, enumerable, MatchingConstants.ProfilesCacheTimeSpan);
 
         return await _cacheService.PopFromListAsync<Profile>(key);
     }
 
     private async Task<int> GetOffsetAsync(int profileId)
     {
-        var value = await _cacheService.GetStringByKeyAsync(OffsetCachePrefix + profileId);
+        var value = await _cacheService.GetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId);
 
         if (value == null)
         {
-            return 0;
+            return MatchingConstants.DefaultOffset;
         }
 
         return int.Parse(value);
@@ -85,6 +81,6 @@ public class MatchService
 
     private async Task CommitOffsetAsync(int profileId, int offset)
     {
-        await _cacheService.SetStringByKeyAsync(OffsetCachePrefix + profileId, offset.ToString(), OffsetCacheTimeSpan);
+        await _cacheService.SetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId, offset.ToString(), MatchingConstants.OffsetCacheTimeSpan);
     }
 }

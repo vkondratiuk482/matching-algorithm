@@ -20,16 +20,14 @@ public sealed class MatchController : Controller
     [HttpGet("{id}")]
     public async Task<Profile?> Get(int id,
         int? age,
-        string? name,
         Genders gender)
     {
-        var mask = new MatchingMask
+        var matchingCriteria = new MatchingCriteria
         {
             Age = age,
-            Name = name,
             Gender = gender,
         };
 
-        return await _matchService.GetAsync(id, mask);
+        return await _matchService.GetAsync(id, matchingCriteria);
     }
 }

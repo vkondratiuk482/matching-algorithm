@@ -22,33 +22,33 @@ public class EfCoreProfileRepository : IProfileRepository
     }
 
     // TODO: Refactor to Specification Pattern
-    public async Task<IEnumerable<Profile>> GetAsync(MatchingMask mask, int take, int skip)
+    public async Task<IEnumerable<Profile>> GetAsync(ProfileCriteria criteria, int take, int skip)
     {
         var query = _applicationContext.Profiles.AsQueryable();
 
-        if (!string.IsNullOrEmpty(mask.Name))
+        if (!string.IsNullOrEmpty(criteria.Name))
         {
-            query = query.Where(x => x.Name == mask.Name);
+            query = query.Where(x => x.Name == criteria.Name);
         }
 
-        if (mask.Age != null)
+        if (criteria.Age != null)
         {
-            query = query.Where(x => x.Age == mask.Age);
+            query = query.Where(x => x.Age == criteria.Age);
         }
 
-        if (mask.Gender != null)
+        if (criteria.Gender != null)
         {
-            query = query.Where(x => x.Gender == mask.Gender);
+            query = query.Where(x => x.Gender == criteria.Gender);
         }
 
-        if (mask.MinScore != null)
+        if (criteria.MinScore != null)
         {
-            query = query.Where(x => x.Score >= mask.MinScore);
+            query = query.Where(x => x.Score >= criteria.MinScore);
         }
 
-        if (mask.MaxScore != null)
+        if (criteria.MaxScore != null)
         {
-            query = query.Where(x => x.Score <= mask.MaxScore);
+            query = query.Where(x => x.Score <= criteria.MaxScore);
         }
 
         query = query.Take(take);
