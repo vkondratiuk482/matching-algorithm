@@ -11,23 +11,17 @@ public static class ProfileAdapter
         {
             Id = entity.Id,
             Age = entity.Age,
-            Description = entity.Description,
-            Gender = entity.Gender,
             Name = entity.Name,
             Score = entity.Score,
+            Gender = entity.Gender,
+            UserId = entity.UserId,
+            Description = entity.Description,
             UncommittedScore = entity.UncommittedScore,
         };
     }
-    
+
     public static IEnumerable<Profile> FromEntityList(IEnumerable<ProfileEntity> entities)
     {
-        return entities.Select(entity => new Profile
-        {
-            Id = entity.Id,
-            Age = entity.Age,
-            Name = entity.Name,
-            Gender = entity.Gender,
-            Description = entity.Description,
-        });
+        return entities.Select(entity => FromEntity(entity));
     }
 }

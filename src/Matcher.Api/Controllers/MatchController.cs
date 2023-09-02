@@ -1,3 +1,4 @@
+using Matcher.Api.Responses;
 using Matcher.Business.Core;
 using Matcher.Business.Enums;
 using Matcher.Business.Services;
@@ -18,7 +19,7 @@ public sealed class MatchController : Controller
 
     // Temp
     [HttpGet("{id}")]
-    public async Task<Profile?> Get(int id,
+    public async Task<ProfileResponse?> Get(int id,
         int? age,
         Genders gender)
     {
@@ -28,6 +29,19 @@ public sealed class MatchController : Controller
             Gender = gender,
         };
 
-        return await _matchService.GetAsync(id, matchingCriteria);
+        var profile = await _matchService.GetAsync(id, matchingCriteria);
+
+        if (profile == null)
+        {
+            return null;
+        }
+
+        return new ProfileResponse
+        {
+            Age = profile.Age,
+            Name = profile.Name,
+            Gender = profile.Gender,
+            Description = profile.Description,
+        };
     }
 }

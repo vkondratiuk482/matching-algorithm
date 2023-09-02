@@ -1,9 +1,9 @@
+using System.Text.Json.Serialization;
 using Matcher.Data;
 using Matcher.Data.Services;
 using Matcher.Data.Repositories;
 using Matcher.Business.Services;
 using Matcher.Business.Interfaces;
-
 using StackExchange.Redis;
 
 namespace Matcher.Api.Extensions;
@@ -60,7 +60,10 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddApiServices(this IServiceCollection services,
         ConfigurationManager configurationManager)
     {
-        services.AddControllers();
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
         services.AddSwaggerGen();
 
         return services;
