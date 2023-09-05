@@ -35,6 +35,7 @@ public class MatchService
         if (existingKey != key)
         {
             await _cacheService.DeleteKeyAsync(existingKey);
+            await CommitOffsetAsync(profile.Id, offset: 0);
         }
 
         var empty = await _cacheService.ListEmptyAsync(key);
@@ -57,14 +58,19 @@ public class MatchService
 
         var enumerable = profiles.ToArray();
 
-        if (!enumerable.Any())
+        if (enumerable.Any())
         {
-            return null;
+            await _cacheService.CreateListAsync(key, enumerable, MatchingConstants.ProfilesCacheTimeSpan);
+
+            return await _cacheService.PopFromListAsync<Profile>(key);
         }
 
-        await _cacheService.CreateListAsync(key, enumerable, MatchingConstants.ProfilesCacheTimeSpan);
+        if (offset > 0)
+        {
+            await CommitOffsetAsync(profile.Id, 0);
+        }
 
-        return await _cacheService.PopFromListAsync<Profile>(key);
+        return null;
     }
 
     private async Task<int> GetOffsetAsync(int profileId)
@@ -81,6 +87,7 @@ public class MatchService
 
     private async Task CommitOffsetAsync(int profileId, int offset)
     {
-        await _cacheService.SetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId, offset.ToString(), MatchingConstants.OffsetCacheTimeSpan);
+        await _cacheService.SetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId, offset.ToString(),
+            MatchingConstants.OffsetCacheTimeSpan);
     }
 }
