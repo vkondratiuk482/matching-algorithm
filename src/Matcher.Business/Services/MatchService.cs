@@ -17,7 +17,6 @@ public class MatchService
     public async Task<Profile?> GetAsync(int userId, MatchingCriteria matchingCriteria)
     {
         var profile = await _profileService.GetByUserIdAsync(userId);
-
         var profileCriteria = new ProfileCriteria
         {
             Age = matchingCriteria.Age,
@@ -26,68 +25,81 @@ public class MatchService
             MaxScore = profile.Score + MatchingConstants.ScoreDelta,
         };
 
-        var prefix = MatchingConstants.ProfilesCachePrefix + profile.Id;
+        var offsetCachingKey = new OffsetCachingKey(profile.Id);
+        var profilesCachingKey = new ProfilesCachingKey(profile.Id, profileCriteria);
 
-        var key = prefix + profileCriteria.ToString();
+        var existingKey = await _cacheService.GetKeyByPatternAsync(profilesCachingKey.Prefix + "*");
 
-        var existingKey = await _cacheService.GetKeyByPatternAsync(prefix + "*");
-
-        if (existingKey != key)
+        if (existingKey != profilesCachingKey.Value)
         {
-            await _cacheService.DeleteKeyAsync(existingKey);
-            await CommitOffsetAsync(profile.Id, offset: 0);
+            await Task.WhenAll(ResetOffsetAsync(offsetCachingKey), DeleteCachedProfilesAsync(profilesCachingKey));
         }
 
-        var empty = await _cacheService.ListEmptyAsync(key);
+        var empty = await _cacheService.ListEmptyAsync(profilesCachingKey.Value);
 
         if (!empty)
         {
-            return await _cacheService.PopFromListAsync<Profile>(key);
+            return await _cacheService.PopFromListAsync<Profile>(profilesCachingKey.Value);
         }
 
-        var offset = await GetOffsetAsync(profile.Id);
+        var offset = await GetOffsetAsync(offsetCachingKey);
 
         if (offset != MatchingConstants.DefaultOffset)
         {
             offset += MatchingConstants.DefaultTake;
         }
 
-        await CommitOffsetAsync(profile.Id, offset);
+        await CommitOffsetAsync(offsetCachingKey, offset);
 
         var profiles = await _profileService.GetAsync(profileCriteria, MatchingConstants.DefaultTake, offset);
 
-        var enumerable = profiles.ToArray();
-
-        if (enumerable.Any())
+        if (profiles.Any())
         {
-            await _cacheService.CreateListAsync(key, enumerable, MatchingConstants.ProfilesCacheTimeSpan);
+            await CacheProfilesAsync(profilesCachingKey, profiles);
 
-            return await _cacheService.PopFromListAsync<Profile>(key);
+            return await PopCachedProfileAsync(profilesCachingKey);
         }
 
         if (offset > 0)
         {
-            await CommitOffsetAsync(profile.Id, 0);
+            await ResetOffsetAsync(offsetCachingKey);
         }
 
         return null;
     }
 
-    private async Task<int> GetOffsetAsync(int profileId)
+    private async Task CacheProfilesAsync(ICachingKey cachingKey, IEnumerable<Profile> profiles)
     {
-        var value = await _cacheService.GetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId);
-
-        if (value == null)
-        {
-            return MatchingConstants.DefaultOffset;
-        }
-
-        return int.Parse(value);
+        await _cacheService.CreateListAsync(cachingKey.Value, profiles, MatchingConstants.ProfilesCachingTimeSpan);
     }
 
-    private async Task CommitOffsetAsync(int profileId, int offset)
+    private async Task DeleteCachedProfilesAsync(ICachingKey cachingKey)
     {
-        await _cacheService.SetStringByKeyAsync(MatchingConstants.OffsetCachePrefix + profileId, offset.ToString(),
-            MatchingConstants.OffsetCacheTimeSpan);
+        var key = await _cacheService.GetKeyByPatternAsync(cachingKey.Prefix + "*");
+
+        await _cacheService.DeleteKeyAsync(key);
+    }
+
+    private async Task<Profile> PopCachedProfileAsync(ICachingKey cachingKey)
+    {
+        return await _cacheService.PopFromListAsync<Profile>(cachingKey.Value);
+    }
+
+    private async Task<int> GetOffsetAsync(ICachingKey cachingKey)
+    {
+        var value = await _cacheService.GetStringByKeyAsync(cachingKey.Value);
+
+        return value == null ? MatchingConstants.DefaultOffset : int.Parse(value);
+    }
+
+    private async Task CommitOffsetAsync(ICachingKey cachingKey, int offset)
+    {
+        await _cacheService.SetStringByKeyAsync(cachingKey.Value, offset.ToString(),
+            MatchingConstants.OffsetCachingTimeSpan);
+    }
+
+    private async Task ResetOffsetAsync(ICachingKey cachingKey)
+    {
+        await CommitOffsetAsync(cachingKey, MatchingConstants.DefaultOffset);
     }
 }

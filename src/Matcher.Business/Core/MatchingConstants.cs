@@ -7,9 +7,9 @@ public static class MatchingConstants
     public static readonly int DefaultTake = 100;
     public static readonly int DefaultOffset = 0;
 
-    public static readonly string OffsetCachePrefix = "offset:";
-    public static readonly TimeSpan OffsetCacheTimeSpan = TimeSpan.FromMinutes(10);
+    public static readonly string OffsetCachingPrefix = "offset:";
+    public static readonly TimeSpan OffsetCachingTimeSpan = TimeSpan.FromMinutes(10);
 
-    public static readonly string ProfilesCachePrefix = "profiles:";
-    public static readonly TimeSpan ProfilesCacheTimeSpan = TimeSpan.FromMinutes(10);
+    public static readonly string ProfilesCachingPrefix = "profiles:";
+    public static readonly TimeSpan ProfilesCachingTimeSpan = TimeSpan.FromMinutes(10);
 }
