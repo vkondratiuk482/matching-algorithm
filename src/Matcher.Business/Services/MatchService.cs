@@ -53,11 +53,18 @@ public class MatchService
 
         var profiles = await _profileService.GetAsync(profileCriteria, MatchingConstants.DefaultTake, offset);
 
-        if (profiles.Any())
+        var list = profiles.ToList();
+        
+        if (list.Count != 0)
         {
-            await CacheProfilesAsync(profilesCachingKey, profiles);
+            var index = list.Count - 1;
 
-            return await PopCachedProfileAsync(profilesCachingKey);
+            var result = list[index];
+            list.RemoveAt(index);
+            
+            await CacheProfilesAsync(profilesCachingKey, list);
+
+            return result;
         }
 
         if (offset > 0)
