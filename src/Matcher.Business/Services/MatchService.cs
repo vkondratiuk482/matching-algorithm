@@ -1,4 +1,5 @@
 using Matcher.Business.Core;
+using Matcher.Business.Extensions;
 using Matcher.Business.Interfaces;
 
 namespace Matcher.Business.Services;
@@ -17,6 +18,7 @@ public class MatchService
     public async Task<Profile?> GetAsync(int userId, MatchingCriteria matchingCriteria)
     {
         var profile = await _profileService.GetByUserIdAsync(userId);
+
         var profileCriteria = new ProfileCriteria
         {
             Age = matchingCriteria.Age,
@@ -54,14 +56,11 @@ public class MatchService
         var profiles = await _profileService.GetAsync(profileCriteria, MatchingConstants.DefaultTake, offset);
 
         var list = profiles.ToList();
-        
+
         if (list.Count != 0)
         {
-            var index = list.Count - 1;
+            var result = list.Pop();
 
-            var result = list[index];
-            list.RemoveAt(index);
-            
             await CacheProfilesAsync(profilesCachingKey, list);
 
             return result;
