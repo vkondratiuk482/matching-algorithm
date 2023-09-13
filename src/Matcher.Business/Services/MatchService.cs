@@ -41,7 +41,7 @@ public class MatchService
 
         if (!empty)
         {
-            return await _cacheService.PopFromListAsync<Profile>(profilesCachingKey.Value);
+            return await PopCachedProfileAsync(profilesCachingKey);
         }
 
         var offset = await GetOffsetAsync(offsetCachingKey);
